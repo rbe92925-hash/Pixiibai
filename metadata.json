@@ -1,0 +1,5 @@
+{
+  "name": "Pixibai",
+  "description": "An application that allows users to create printed photo albums by selecting images from their devices. Users can customize albums with comments, dates, choose a cover, and edit photos with AI. The app also offers other products like magnets and frames for printing and home delivery, primarily in Peru.",
+  "requestFramePermissions": []
+}

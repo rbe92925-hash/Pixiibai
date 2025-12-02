@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import type { Product, CartItem, AppView } from './types';
 import { Header } from './components/Header';
@@ -69,7 +70,7 @@ const App: React.FC = () => {
   }, [view, cart, selectedProduct, handleProductSelect, handleAddToCart, handleRemoveFromCart, restart]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
+    <div className="min-h-screen flex flex-col bg-slate-50">
       <Header 
         onRestart={restart} 
         cartItemCount={cartItemCount}

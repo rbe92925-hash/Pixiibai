@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import type { ChatMessage } from '../types';
 import { getChatbotResponse } from '../services/geminiService';
@@ -49,42 +50,45 @@ export const ChatWidget: React.FC = () => {
 
     return (
         <>
-            <div className={`fixed bottom-6 right-6 transition-transform duration-300 ${isOpen ? 'scale-0' : 'scale-100'}`}>
+            <div className={`fixed bottom-6 right-6 transition-transform duration-300 z-50 ${isOpen ? 'scale-0' : 'scale-100'}`}>
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="bg-gray-800 text-white rounded-full p-4 shadow-lg hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700"
+                    className="bg-indigo-600 text-white rounded-full p-4 shadow-xl hover:bg-indigo-700 hover:scale-105 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     aria-label="Abrir chat de ayuda"
                 >
-                    <MessageSquareIcon className="h-8 w-8" />
+                    <MessageSquareIcon className="h-7 w-7" />
                 </button>
             </div>
 
-            <div className={`fixed bottom-6 right-6 w-full max-w-sm h-[70vh] bg-white rounded-xl shadow-2xl flex flex-col transition-all duration-300 origin-bottom-right ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none'}`}>
+            <div className={`fixed bottom-6 right-6 w-full max-w-sm h-[70vh] bg-white rounded-2xl shadow-2xl flex flex-col transition-all duration-300 origin-bottom-right z-50 ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none'}`}>
                 {/* Header */}
-                <div className="flex justify-between items-center p-4 bg-gray-800 text-white rounded-t-xl">
-                    <h3 className="font-bold text-lg">Asistente Virtual</h3>
-                    <button onClick={() => setIsOpen(false)} aria-label="Cerrar chat">
+                <div className="flex justify-between items-center p-5 bg-indigo-600 text-white rounded-t-2xl shadow-md">
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <h3 className="font-bold text-lg">Asistente Pixibai</h3>
+                    </div>
+                    <button onClick={() => setIsOpen(false)} aria-label="Cerrar chat" className="text-white/80 hover:text-white transition-colors">
                         <XIcon className="h-6 w-6" />
                     </button>
                 </div>
                 
                 {/* Messages */}
-                <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+                <div className="flex-1 p-4 overflow-y-auto bg-slate-50">
                     <div className="space-y-4">
                         {messages.map(msg => (
                             <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-xs md:max-w-sm px-4 py-2 rounded-2xl ${msg.sender === 'user' ? 'bg-gray-700 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'}`}>
-                                    <p className="text-sm">{msg.text}</p>
+                                <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.sender === 'user' ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-white text-slate-700 border border-slate-100 rounded-bl-none'}`}>
+                                    <p>{msg.text}</p>
                                 </div>
                             </div>
                         ))}
                         {isLoading && (
                              <div className="flex justify-start">
-                                <div className="max-w-xs md:max-w-sm px-4 py-2 rounded-2xl bg-gray-200 text-gray-800 rounded-bl-none">
+                                <div className="max-w-[85%] px-4 py-3 rounded-2xl bg-white border border-slate-100 rounded-bl-none shadow-sm">
                                     <div className="flex items-center space-x-1">
-                                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-pulse-fast"></span>
-                                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-pulse-medium"></span>
-                                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-pulse-slow"></span>
+                                        <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse-fast"></span>
+                                        <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse-medium"></span>
+                                        <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse-slow"></span>
                                     </div>
                                 </div>
                             </div>
@@ -94,18 +98,18 @@ export const ChatWidget: React.FC = () => {
                 </div>
 
                 {/* Input */}
-                <div className="p-4 border-t bg-white rounded-b-xl">
-                    <form onSubmit={handleSendMessage} className="flex items-center">
+                <div className="p-4 border-t border-slate-100 bg-white rounded-b-2xl">
+                    <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                         <input
                             type="text"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             placeholder="Escribe tu pregunta..."
-                            className="flex-1 border-gray-300 rounded-full py-2 px-4 focus:ring-gray-800 focus:border-gray-800"
+                            className="flex-1 border-slate-200 bg-slate-50 rounded-full py-2.5 px-4 text-sm focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all"
                             disabled={isLoading}
                         />
-                        <button type="submit" className="ml-3 text-gray-700 hover:text-gray-900 disabled:text-gray-400" disabled={isLoading || !inputValue.trim()}>
-                            <SendIcon className="h-6 w-6" />
+                        <button type="submit" className="p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors" disabled={isLoading || !inputValue.trim()}>
+                            <SendIcon className="h-5 w-5" />
                         </button>
                     </form>
                 </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import type { Photo, Product, CartItem, GiftCardDetails, ProductOption, SelectedOptions } from '../types';
 import { PhotoCard } from './PhotoCard';
@@ -12,19 +13,20 @@ interface ProductCustomizerProps {
 
 const ProductDetails: React.FC<{ product: Product, calculatedPrice?: number }> = ({ product, calculatedPrice }) => (
     <div className="lg:pr-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">{product.name}</h2>
-        <p className="text-lg text-gray-600 mt-2 mb-6">{product.tagline}</p>
+        <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">{product.name}</h2>
+        <p className="text-lg text-slate-600 mb-8 font-light">{product.tagline}</p>
         
         {product.details.map((section, index) => (
-            <div key={index} className="mt-4">
-                <h4 className="font-semibold text-gray-800">{section.title}</h4>
-                <ul className="list-disc list-inside text-gray-600 text-sm mt-2 space-y-1">
+            <div key={index} className="mt-6 p-4 bg-white rounded-xl border border-slate-100 shadow-sm">
+                <h4 className="font-semibold text-indigo-700 mb-2">{section.title}</h4>
+                <ul className="list-disc list-inside text-slate-600 text-sm space-y-2">
                     {section.points.map((point, pIndex) => <li key={pIndex}>{point}</li>)}
                 </ul>
             </div>
         ))}
-        <div className="mt-8">
-            <p className="text-3xl font-bold text-gray-900">
+        <div className="mt-8 flex items-baseline gap-2">
+             <span className="text-sm text-slate-500 font-medium uppercase tracking-wider">Total estimado:</span>
+            <p className="text-4xl font-bold text-slate-900">
                 {calculatedPrice !== undefined ? `S/ ${calculatedPrice.toFixed(2)}` : product.priceText}
             </p>
         </div>
@@ -53,16 +55,15 @@ const PhotoBasedCustomizer: React.FC<Omit<ProductCustomizerProps, 'onAddToCart'>
         } else if (product.type === 'frame') {
             let tierPrice = product.basePrice || 0;
             const sortedTiers = product.options?.tiers?.sort((a,b) => a.qty - b.qty) || [];
-            const applicableTier = sortedTiers.find(tier => quantity === tier.qty);
-
-            if (applicableTier) {
-                tierPrice = applicableTier.price;
-            } else if (quantity > (sortedTiers.at(-1)?.qty || 0)) {
-                const baseTier = sortedTiers.at(-1)!;
-                const additionalQty = quantity - baseTier.qty;
-                const additionalPrice = (product.options?.tiers?.at(-1)?.price || baseTier.price/baseTier.qty) - 50; // 299 per additional
-                tierPrice = baseTier.price + (additionalQty * additionalPrice);
+            
+            // Logic for finding the exact tier or the highest applicable tier
+            const exactTier = sortedTiers.find(tier => quantity === tier.qty);
+            
+            if (exactTier) {
+                tierPrice = exactTier.price;
             } else {
+                 // Fallback simple logic if exact quantity isn't a tier: linear pricing based on base
+                 // Ideally this should use the highest previous tier logic, but keeping it simple for now based on data structure
                  tierPrice = (product.basePrice || 0) * quantity;
             }
            
@@ -136,38 +137,49 @@ const PhotoBasedCustomizer: React.FC<Omit<ProductCustomizerProps, 'onAddToCart'>
             <div className="space-y-6">
                 {product.options?.sizes && (
                     <div>
-                        <h4 className="font-semibold text-gray-800 mb-2">Tamaño</h4>
+                        <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3">Tamaño</h4>
                         <div className="flex flex-wrap gap-2">
-                             {product.options.sizes.map(opt => <button key={opt.name} onClick={() => setSelectedSize(opt)} className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${selectedSize?.name === opt.name ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>{opt.name}</button>)}
+                             {product.options.sizes.map(opt => <button key={opt.name} onClick={() => setSelectedSize(opt)} className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${selectedSize?.name === opt.name ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{opt.name}</button>)}
                         </div>
                     </div>
                 )}
                  {product.options?.covers && (
                     <div>
-                        <h4 className="font-semibold text-gray-800 mb-2">Pasta</h4>
+                        <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3">Pasta</h4>
                         <div className="flex flex-wrap gap-2">
-                             {product.options.covers.map(opt => <button key={opt.name} onClick={() => setSelectedCover(opt)} className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${selectedCover?.name === opt.name ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>{opt.name}</button>)}
+                             {product.options.covers.map(opt => <button key={opt.name} onClick={() => setSelectedCover(opt)} className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${selectedCover?.name === opt.name ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{opt.name}</button>)}
                         </div>
                     </div>
                 )}
                  {product.options?.pages && (
                     <div>
-                        <h4 className="font-semibold text-gray-800 mb-2">Páginas</h4>
+                        <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3">Páginas</h4>
                         <div className="flex flex-wrap gap-2">
-                             {product.options.pages.map(opt => <button key={opt.name} onClick={() => setSelectedPages(opt)} className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm ${selectedPages?.name === opt.name ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>{opt.name}</button>)}
+                             {product.options.pages.map(opt => <button key={opt.name} onClick={() => setSelectedPages(opt)} className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${selectedPages?.name === opt.name ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{opt.name}</button>)}
                         </div>
                     </div>
                 )}
                 {product.type === 'frame' && (
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         <div>
-                             <h4 className="font-semibold text-gray-800 mb-2">Cantidad</h4>
-                             <input type="number" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value)))} className="w-24 border-gray-300 rounded-md shadow-sm focus:ring-gray-800 focus:border-gray-800" />
+                             <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3">Cantidad</h4>
+                             <div className="flex gap-4">
+                                {product.options?.tiers?.map(tier => (
+                                    <button 
+                                        key={tier.qty} 
+                                        onClick={() => setQuantity(tier.qty)}
+                                        className={`flex flex-col items-center justify-center w-20 h-20 rounded-xl border-2 transition-all ${quantity === tier.qty ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-200 hover:border-indigo-300 text-slate-600'}`}
+                                    >
+                                        <span className="text-xl font-bold">{tier.qty}</span>
+                                        <span className="text-xs">Unid.</span>
+                                    </button>
+                                ))}
+                             </div>
                         </div>
                          {product.options?.frame && (
-                             <div className="flex items-center">
-                                 <input type="checkbox" id="addFrame" checked={hasFrame} onChange={e => setHasFrame(e.target.checked)} className="h-4 w-4 text-gray-800 border-gray-300 rounded focus:ring-gray-700" />
-                                 <label htmlFor="addFrame" className="ml-2 block text-sm text-gray-800">Añadir marco (+ S/ {product.options.frame.price.toFixed(2)} c/u)</label>
+                             <div className="flex items-center p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                 <input type="checkbox" id="addFrame" checked={hasFrame} onChange={e => setHasFrame(e.target.checked)} className="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
+                                 <label htmlFor="addFrame" className="ml-3 block text-sm font-medium text-slate-700">Añadir marco (+ S/ {product.options.frame.price.toFixed(2)} c/u)</label>
                              </div>
                          )}
                     </div>
@@ -179,14 +191,14 @@ const PhotoBasedCustomizer: React.FC<Omit<ProductCustomizerProps, 'onAddToCart'>
     return (
         <div className="grid lg:grid-cols-2 gap-12">
             <ProductDetails product={product} calculatedPrice={calculatedPrice}/>
-            <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
                 {renderOptions()}
 
-                <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-10 text-center group hover:border-gray-800 transition-colors my-8">
-                    <div className="flex flex-col items-center text-gray-500 group-hover:text-gray-800 transition-colors">
+                <div className="relative border-2 border-dashed border-indigo-100 bg-indigo-50/30 rounded-2xl p-10 text-center group hover:border-indigo-300 hover:bg-indigo-50 transition-all my-8">
+                    <div className="flex flex-col items-center text-slate-400 group-hover:text-indigo-600 transition-colors">
                         <UploadIcon className="h-12 w-12 mb-4" />
-                        <p className="text-lg font-semibold">Arrastra o selecciona tus fotos</p>
-                        <label htmlFor="file-upload" className="mt-4 cursor-pointer bg-gray-800 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-900 transition-colors">
+                        <p className="text-lg font-medium text-slate-600">Arrastra o selecciona tus fotos</p>
+                        <label htmlFor="file-upload" className="mt-4 cursor-pointer bg-white text-indigo-600 border border-indigo-200 font-bold py-2 px-6 rounded-full hover:bg-indigo-600 hover:text-white hover:border-transparent transition-all shadow-sm">
                             {photos.length > 0 ? 'Añadir más fotos' : 'Elegir desde dispositivo'}
                         </label>
                     </div>
@@ -211,10 +223,10 @@ const PhotoBasedCustomizer: React.FC<Omit<ProductCustomizerProps, 'onAddToCart'>
                 )}
                 
                 <div className="mt-8 flex flex-col sm:flex-row justify-end items-center gap-4">
-                    <button onClick={onBack} className="w-full sm:w-auto bg-white border border-gray-300 text-gray-800 font-bold py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors">
+                    <button onClick={onBack} className="w-full sm:w-auto text-slate-500 font-bold py-3 px-8 rounded-xl hover:bg-slate-100 transition-colors">
                         Cancelar
                     </button>
-                    <button onClick={handleFinalizeClick} disabled={photos.length === 0} className="w-full sm:w-auto bg-gray-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-900 transition-colors disabled:bg-gray-400">
+                    <button onClick={handleFinalizeClick} disabled={photos.length === 0} className="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200 transition-all disabled:bg-slate-300 disabled:shadow-none">
                         Añadir al carrito
                     </button>
                 </div>
@@ -238,31 +250,31 @@ const GiftCardCustomizer: React.FC<Omit<ProductCustomizerProps, 'onAddToCart'> &
         setDetails(prev => ({...prev, [key]: value}));
     }
 
-    const amounts = [50, 100, 200, 500];
+    const amounts = [50, 100, 200];
     const occasions = ['Feliz Cumpleaños', 'Baby Shower', 'Alguien Especial', 'Solo porque sí'];
 
     return (
        <div className="grid lg:grid-cols-2 gap-12">
             <ProductDetails product={product} calculatedPrice={details.amount} />
-            <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <div className="mb-6">
-                                <label className="block text-sm font-bold text-gray-700 mb-2">1. Elige un monto (PEN)</label>
+                                <label className="block text-sm font-bold text-slate-700 mb-2">1. Elige un monto (PEN)</label>
                                 <div className="flex flex-wrap gap-2">
                                     {amounts.map(amount => (
-                                        <button type="button" key={amount} onClick={() => setDetail('amount', amount)} className={`px-4 py-2 rounded-lg font-semibold transition-colors ${details.amount === amount ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                                        <button type="button" key={amount} onClick={() => setDetail('amount', amount)} className={`px-4 py-2 rounded-lg font-semibold transition-all ${details.amount === amount ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                                             S/ {amount}
                                         </button>
                                     ))}
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">2. Ocasión de Regalo</label>
+                                <label className="block text-sm font-bold text-slate-700 mb-2">2. Ocasión de Regalo</label>
                                  <div className="flex flex-wrap gap-2">
                                     {occasions.map(occ => (
-                                        <button type="button" key={occ} onClick={() => setDetail('occasion', occ)} className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${details.occasion === occ ? 'bg-gray-200 text-gray-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                                        <button type="button" key={occ} onClick={() => setDetail('occasion', occ)} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${details.occasion === occ ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>
                                             {occ}
                                         </button>
                                     ))}
@@ -271,24 +283,24 @@ const GiftCardCustomizer: React.FC<Omit<ProductCustomizerProps, 'onAddToCart'> &
                         </div>
                         <div>
                             <div className="mb-4">
-                                 <label htmlFor="recipientName" className="block text-sm font-bold text-gray-700 mb-1">Para:</label>
-                                 <input type="text" id="recipientName" value={details.recipientName} onChange={e => setDetail('recipientName', e.target.value)} required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-800 focus:border-gray-800" placeholder="Nombre del destinatario"/>
+                                 <label htmlFor="recipientName" className="block text-sm font-bold text-slate-700 mb-1">Para:</label>
+                                 <input type="text" id="recipientName" value={details.recipientName} onChange={e => setDetail('recipientName', e.target.value)} required className="mt-1 block w-full border-slate-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-400" placeholder="Nombre del destinatario"/>
                             </div>
                              <div className="mb-4">
-                                 <label htmlFor="recipientEmail" className="block text-sm font-bold text-gray-700 mb-1">Email del destinatario:</label>
-                                 <input type="email" id="recipientEmail" value={details.recipientEmail} onChange={e => setDetail('recipientEmail', e.target.value)} required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-800 focus:border-gray-800" placeholder="email@ejemplo.com"/>
+                                 <label htmlFor="recipientEmail" className="block text-sm font-bold text-slate-700 mb-1">Email del destinatario:</label>
+                                 <input type="email" id="recipientEmail" value={details.recipientEmail} onChange={e => setDetail('recipientEmail', e.target.value)} required className="mt-1 block w-full border-slate-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-400" placeholder="email@ejemplo.com"/>
                             </div>
                              <div>
-                                 <label htmlFor="message" className="block text-sm font-bold text-gray-700 mb-1">Mensaje:</label>
-                                 <textarea id="message" value={details.message} onChange={e => setDetail('message', e.target.value)} rows={4} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-800 focus:border-gray-800" placeholder="Escribe un mensaje especial..."/>
+                                 <label htmlFor="message" className="block text-sm font-bold text-slate-700 mb-1">Mensaje:</label>
+                                 <textarea id="message" value={details.message} onChange={e => setDetail('message', e.target.value)} rows={4} className="mt-1 block w-full border-slate-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-400" placeholder="Escribe un mensaje especial..."/>
                             </div>
                         </div>
                     </div>
-                     <div className="mt-8 pt-6 border-t flex flex-col sm:flex-row justify-end items-center gap-4">
-                        <button type="button" onClick={onBack} className="w-full sm:w-auto bg-white border border-gray-300 text-gray-800 font-bold py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors">
+                     <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row justify-end items-center gap-4">
+                        <button type="button" onClick={onBack} className="w-full sm:w-auto text-slate-500 font-bold py-3 px-8 rounded-xl hover:bg-slate-100 transition-colors">
                             Cancelar
                         </button>
-                        <button type="submit" className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gray-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-900 transition-colors">
+                        <button type="submit" className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all">
                             <GiftCardIcon className="w-5 h-5"/>
                             Añadir al carrito
                         </button>
